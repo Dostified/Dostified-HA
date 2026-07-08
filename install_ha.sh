@@ -3,6 +3,10 @@
 VENV_DIR="$HOME/homeassistant"
 SHORTCUTS_DIR="$HOME/.shortcuts"
 
+# [CRITICAL FIX] Tells the Rust compiler which Android API to use for Cryptography
+export ANDROID_API_LEVEL=24
+export MATHLIB="m"
+
 # Function to automatically generate widget shortcuts
 create_shortcuts() {
     echo "[*] Creating homescreen widget shortcuts..."
@@ -10,12 +14,13 @@ create_shortcuts() {
     
     # 1. Shortcut for this Master Menu
     echo "#!/data/data/com.termux/files/usr/bin/bash" > "$SHORTCUTS_DIR/HA_Master_Menu.sh"
-    echo "bash ~/install_ha.sh" >> "$SHORTCUTS_DIR/HA_Master_Menu.sh"
+    echo "bash /data/data/com.termux/files/home/install_ha.sh" >> "$SHORTCUTS_DIR/HA_Master_Menu.sh"
     chmod +x "$SHORTCUTS_DIR/HA_Master_Menu.sh"
 
     # 2. Shortcut for starting Home Assistant
     echo "#!/data/data/com.termux/files/usr/bin/bash" > "$SHORTCUTS_DIR/Start_HA.sh"
-    echo "source ~/homeassistant/bin/activate && hass -v" >> "$SHORTCUTS_DIR/Start_HA.sh"
+    echo "source /data/data/com.termux/files/home/homeassistant/bin/activate" >> "$SHORTCUTS_DIR/Start_HA.sh"
+    echo "/data/data/com.termux/files/home/homeassistant/bin/hass -v" >> "$SHORTCUTS_DIR/Start_HA.sh"
     chmod +x "$SHORTCUTS_DIR/Start_HA.sh"
 
     echo "[✓] Widget shortcuts generated successfully!"
@@ -24,11 +29,10 @@ create_shortcuts() {
 
 install_dependencies() {
     echo "[*] Updating packages and installing system dependencies..."
-    # The 'yes |' command automatically presses "Y" and Enter for every single hidden prompt.
-    # The Dpkg option forces Termux to keep default configurations without stopping to ask.
     yes | pkg update -y
     yes | pkg upgrade -y -o Dpkg::Options::="--force-confold"
-    yes | pkg install python rust make clang libffi openssl -y
+    # Added libjpeg-turbo and zlib just in case HA image integrations need them
+    yes | pkg install python rust make clang libffi openssl libjpeg-turbo zlib -y
 }
 
 # Infinite loop for the interactive menu
@@ -55,7 +59,7 @@ while true; do
                 source "$VENV_DIR/bin/activate"
                 if command -v hass >/dev/null 2>&1; then
                     echo "[✓] Home Assistant Core is installed and accessible."
-                    echo "[*] You are ready to run: Start_HA.sh"
+                    echo "[*] You are ready to run the widget: Start_HA.sh"
                 else
                     echo "[!] Environment exists, but Home Assistant is broken or missing."
                 fi
@@ -74,8 +78,10 @@ while true; do
                 echo "[*] Creating isolated Python environment..."
                 python -m venv "$VENV_DIR"
                 source "$VENV_DIR/bin/activate"
-                echo "[*] Downloading and installing Home Assistant..."
-                pip install --upgrade pip wheel homeassistant
+                echo "[*] Upgrading PIP..."
+                pip install --upgrade pip wheel
+                echo "[*] Compiling Cryptography and installing Home Assistant (This takes 5-10 minutes)..."
+                pip install homeassistant
                 echo "[✓] Fresh installation complete!"
                 create_shortcuts
             fi
@@ -90,8 +96,10 @@ while true; do
             echo "[*] Building fresh environment..."
             python -m venv "$VENV_DIR"
             source "$VENV_DIR/bin/activate"
-            echo "[*] Reinstalling Home Assistant core..."
-            pip install --upgrade pip wheel homeassistant
+            echo "[*] Upgrading PIP..."
+            pip install --upgrade pip wheel
+            echo "[*] Compiling Cryptography and reinstalling Home Assistant..."
+            pip install homeassistant
             echo "[✓] Reinstallation complete! Your config data was not touched."
             create_shortcuts
             read -p "Press Enter to return to menu..."
