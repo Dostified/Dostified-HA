@@ -24,8 +24,11 @@ create_shortcuts() {
 
 install_dependencies() {
     echo "[*] Updating packages and installing system dependencies..."
-    pkg update -y && pkg upgrade -y
-    pkg install python rust make clang libffi openssl -y
+    # The 'yes |' command automatically presses "Y" and Enter for every single hidden prompt.
+    # The Dpkg option forces Termux to keep default configurations without stopping to ask.
+    yes | pkg update -y
+    yes | pkg upgrade -y -o Dpkg::Options::="--force-confold"
+    yes | pkg install python rust make clang libffi openssl -y
 }
 
 # Infinite loop for the interactive menu
@@ -41,9 +44,7 @@ while true; do
     echo "  5) Generate Widget Shortcuts"
     echo "  6) Exit Menu"
     echo "================================================="
-    
-    # The magic fix: </dev/tty forces it to listen to the user's keyboard
-    read -p "Select an option [1-6]: " choice </dev/tty
+    read -p "Select an option [1-6]: " choice
 
     case $choice in
         1)
@@ -61,7 +62,7 @@ while true; do
             else
                 echo "[!] No Home Assistant installation found. Please run Option 2."
             fi
-            read -p "Press Enter to return to menu..." </dev/tty
+            read -p "Press Enter to return to menu..."
             ;;
         2)
             echo ""
@@ -78,7 +79,7 @@ while true; do
                 echo "[✓] Fresh installation complete!"
                 create_shortcuts
             fi
-            read -p "Press Enter to return to menu..." </dev/tty
+            read -p "Press Enter to return to menu..."
             ;;
         3)
             echo ""
@@ -93,7 +94,7 @@ while true; do
             pip install --upgrade pip wheel homeassistant
             echo "[✓] Reinstallation complete! Your config data was not touched."
             create_shortcuts
-            read -p "Press Enter to return to menu..." </dev/tty
+            read -p "Press Enter to return to menu..."
             ;;
         4)
             echo ""
@@ -106,12 +107,12 @@ while true; do
             else
                 echo "[!] Cannot repair: No installation found. Run Option 2 instead."
             fi
-            read -p "Press Enter to return to menu..." </dev/tty
+            read -p "Press Enter to return to menu..."
             ;;
         5)
             echo ""
             create_shortcuts
-            read -p "Press Enter to return to menu..." </dev/tty
+            read -p "Press Enter to return to menu..."
             ;;
         6)
             echo ""
