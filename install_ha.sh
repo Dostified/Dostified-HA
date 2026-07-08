@@ -41,7 +41,9 @@ while true; do
     echo "  5) Generate Widget Shortcuts"
     echo "  6) Exit Menu"
     echo "================================================="
-    read -p "Select an option [1-6]: " choice
+    
+    # The magic fix: </dev/tty forces it to listen to the user's keyboard
+    read -p "Select an option [1-6]: " choice </dev/tty
 
     case $choice in
         1)
@@ -59,7 +61,7 @@ while true; do
             else
                 echo "[!] No Home Assistant installation found. Please run Option 2."
             fi
-            read -p "Press Enter to return to menu..."
+            read -p "Press Enter to return to menu..." </dev/tty
             ;;
         2)
             echo ""
@@ -76,7 +78,7 @@ while true; do
                 echo "[✓] Fresh installation complete!"
                 create_shortcuts
             fi
-            read -p "Press Enter to return to menu..."
+            read -p "Press Enter to return to menu..." </dev/tty
             ;;
         3)
             echo ""
@@ -91,7 +93,7 @@ while true; do
             pip install --upgrade pip wheel homeassistant
             echo "[✓] Reinstallation complete! Your config data was not touched."
             create_shortcuts
-            read -p "Press Enter to return to menu..."
+            read -p "Press Enter to return to menu..." </dev/tty
             ;;
         4)
             echo ""
@@ -104,12 +106,12 @@ while true; do
             else
                 echo "[!] Cannot repair: No installation found. Run Option 2 instead."
             fi
-            read -p "Press Enter to return to menu..."
+            read -p "Press Enter to return to menu..." </dev/tty
             ;;
         5)
             echo ""
             create_shortcuts
-            read -p "Press Enter to return to menu..."
+            read -p "Press Enter to return to menu..." </dev/tty
             ;;
         6)
             echo ""
